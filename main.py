@@ -1,10 +1,14 @@
-import pygame
+import random
+
+import cv2
 import numpy as np
-from numpy import random
+import pygame
+import pytesseract
 
 
 def dist(pointA, pointB):
     return np.sqrt((pointA[0] - pointB[0]) ** 2 + (pointA[1] - pointB[1]) ** 2)
+
 
 def near_points(point):
     count = random.randint(2, 5)
@@ -24,44 +28,32 @@ if __name__ == '__main__':
     pygame.display.update()
     is_active = True
     is_pressed = False
-    points = []
     count_of_keyup = 0
-    clusters = {}
+    clock = pygame.time.Clock()
+
     while (is_active):
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 is_active = False
-            if event.type == pygame.MOUSEBUTTONDOWN:
-                is_pressed = True
-                if event.button == 1:
-                    is_pressed = True
-                    coord = event.pos
-                    points.append(coord)
-                    pygame.draw.circle(screen, color='black', center=coord, radius=5)
-            if event.type == pygame.MOUSEBUTTONUP:
-                is_pressed = False
             if event.type == pygame.MOUSEMOTION:
-                if is_pressed:
-                    # if random.choice((0,10))==0:
-                    # coord = event.pos
-                    # pygame.draw.circle(screen, color='black', center=coord, radius=10)
-                    if dist(event.pos, points[-1]) > 20:
-                        coord = event.pos
-                        pygame.draw.circle(screen, color='black', center=coord, radius=5)
-                        for nearP in near_points(coord):
-                            pygame.draw.circle(screen, color='black', center=nearP, radius=5)
-                            points.append(nearP)
-                        points.append(coord)
+                if event.buttons[0]:  # Left mouse button down.
+                    last = (event.pos[0] - event.rel[0], event.pos[1] - event.rel[1])
+                    pygame.draw.line(screen, 'black', last, event.pos, 10)
             if event.type == pygame.KEYUP:
                 if event.key == 13:
-                    count_of_keyup = count_of_keyup + 1
-                    #if count_of_keyup == 1:
-                    #    clusters = dbscan(points, 50, 4, screen)
-                    #else:
-                    #    for colour, points in zip(cycle(["blue", "green", "red", "yellow", "grey", "black"]),
-                    #                              clusters.values()):
-                    #        points_in_one_group = [p for p in points]
-                    #        for p in points_in_one_group:
-                    #            pygame.draw.circle(screen, color=colour, center=p, radius=5)
+                    pygame.image.save(screen, "screenshot.png")
+            pygame.display.update()
+        clock.tick(30)
+    img = cv2.imread('screenshot.png')
+    img_rgb = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
 
-        pygame.display.update()
+    config = r'--oem 3 --psm 6 -c tessedit_char_whitelist=0123456789'
+    result = pytesseract.image_to_string(img, config=config)
+
+    i = 0
+    while result[i] == '0':
+        if result == "0":
+            break
+        result = str(result).replace("0", "", 1)
+
+    print(result)
