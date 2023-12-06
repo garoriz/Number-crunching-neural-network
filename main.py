@@ -51,9 +51,10 @@ if __name__ == '__main__':
     result = pytesseract.image_to_string(img, config=config)
 
     i = 0
-    while result[i] == '0':
-        if result == "0":
-            break
-        result = str(result).replace("0", "", 1)
+    if len(result) > 2:
+        while result[i] == '0':
+            if result == "0\n":
+                break
+            result = str(result).replace("0", "", 1)
 
     print(result)
