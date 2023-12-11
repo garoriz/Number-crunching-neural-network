@@ -47,7 +47,7 @@ if __name__ == '__main__':
     img = cv2.imread('screenshot.png')
     img_rgb = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
 
-    config = r'--oem 3 --psm 6 -c tessedit_char_whitelist=0123456789'
+    config = r'--oem 3 --psm 6 -c tessedit_char_whitelist=0123456789-,.'
     result = pytesseract.image_to_string(img, config=config)
 
     i = 0
